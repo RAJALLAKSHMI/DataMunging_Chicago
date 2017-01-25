@@ -1,97 +1,93 @@
-readline = require('readline');
- const fs = require('fs');
- var header =[];
- var jsonData1=[],jsonData2=[];
- var tempData1={},tempData2={};
- var over=[],under=[],noArrest=[];
- var i=0,j=0,k=0;
- var arrested=[];
- var year=0,type=0,description=0,arrest=0,code=0,crimeYear=0;
- for(i=0 ;i<=15;i++)
- {
-  over[i]=0;
-  under[i]=0;
-  arrested[i]=0;
-  noArrest[i]=0;
+module.exports = (function(age)
+{
+if(!age){
+  throw Error('Not a number');
 }
-var isHeader=true;
+if(typeof age!=="number"){
+    throw Error('Not a number');
+}
+  else {
+let log4js = require('log4js');
+let logger = log4js.getLogger();
+const readline = require('readline');
+const fs = require('fs');
+let header = [];
+let jsonData1 = [];
+let jsonData2 = [];
+let tempData1 = {};
+let tempData2 = {};
+let over = [];
+let under = [];
+let noArrest = [];
+let i = 0;
+let arrested = [];
+let year = 0;
+let type = 0;
+let description = 0;
+let arrest = 0;
+for (i = 0; i <= 15; i = i + 1) {
+    over[i] = 0;
+    under[i] = 0;
+    arrested[i] = 0;
+    noArrest[i] = 0;
+}
+let isHeader = true;
 const rl = readline.createInterface({
 
-  input: fs.createReadStream('../crimedata.csv')
+    input: fs.createReadStream('../inputdata/crimedata.csv')
 
 });
-rl.on('line', function(line)
-{
- var lineRecords= line.trim().split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);;
- for(var i=0;i<lineRecords.length;i++)
- {
-   if(isHeader)
-   {
-     header[i]=lineRecords[i];
-     if(header[i]=="Year")
-     {
-       year=i;
-     }
-     if(header[i]=="Description")
-     {
-       description=i;
-     }
-     if(header[i]=="Arrest")
-     {
-       arrest=i;
-     }
-     if(header[i]=="Primary Type")
-     {
-       type=i;
-     }
-  }
+rl.on('line', function(line) {
+    let lineRecords = line.trim().split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+    for (i = 0; i < lineRecords.length; i = i + 1) {
+        if (isHeader) {
+            header[i] = lineRecords[i];
+            if (header[i] === 'Year') {
+                year = i;
+            }
+            if (header[i] === 'Description') {
+                description = i;
+            }
+            if (header[i] === 'Arrest') {
+                arrest = i;
+            }
+            if (header[i] === 'Primary Type') {
+                type = i;
+            }
+        }
+    }
+
+    if (lineRecords[type] === 'THEFT' && lineRecords[description] === 'OVER $500') {
+        over[lineRecords[year] - 2001] = over[lineRecords[year] - 2001] + 1;
+    } else if (lineRecords[type] === 'THEFT' && lineRecords[description] === '$500 AND UNDER') {
+        under[lineRecords[year] - 2001] = under[lineRecords[year] - 2001] + 1;
+    } else if (lineRecords[type] === 'ASSAULT' && lineRecords[arrest] === 'true') {
+        arrested[lineRecords[year] - 2001] = arrested[lineRecords[year] - 2001] + 1;
+    } else if (lineRecords[type] === 'ASSAULT' && lineRecords[arrest] === 'false') {
+        noArrest[lineRecords[year] - 2001] = noArrest[lineRecords[year] - 2001] + 1;
+    }
+
+    isHeader = false;
+});
+
+rl.on('close', function() {
+    for (i = 0; i <= 15; i = i + 1) {
+        tempData1 = {};
+        tempData1.Year = i + 2001;
+        tempData1['Over $500'] = over[i];
+        tempData1['Under $500'] = under[i];
+        jsonData1.push(tempData1);
+        tempData2 = {};
+        tempData2.Year = i + 2001;
+        tempData2.Arrested = arrested[i];
+        tempData2['Not Arrested'] = noArrest[i];
+        jsonData2.push(tempData2);
+    }
+    fs.writeFileSync('../outputdata/crimedata.json', JSON.stringify(jsonData1), 'utf8');
+    logger.debug('Writtten to file 1');
+    fs.writeFileSync('../outputdata/assault.json', JSON.stringify(jsonData2), 'utf8');
+    logger.debug('Written to file 2');
+  });
+  return "JSON written successfully";
 }
-
-   if(lineRecords[type]=="THEFT" && lineRecords[description]=="OVER $500")
-   {
-
-    over[lineRecords[year]-2001]++;
-  }
-  else if(lineRecords[type]=="THEFT" && lineRecords[description]=="$500 AND UNDER")
-  {
-    under[lineRecords[year]-2001]++;
-  }
-  else if(lineRecords[type]=="ASSAULT" && lineRecords[arrest]=="true")
-  {
-    arrested[lineRecords[year]-2001]++;
-  }
-  else if(lineRecords[type]=="ASSAULT" && lineRecords[arrest]=="false")
-  {
-    noArrest[lineRecords[year]-2001]++;
-  }
-
-  isHeader=false;
-});
-
-rl.on('close',function()
-{
-  for(var i=0;i<=15;i++)
-  {
-
-    tempData1={};
-    tempData1["Year"]=i+2001;
-    tempData1["Over $500"]=over[i];
-    tempData1["Under $500"]=under[i];
-    jsonData1.push(tempData1);
-
-
-    tempData2={};
-    tempData2["Year"]=i+2001;
-    tempData2["Arrested"]=arrested[i];
-    tempData2["Not Arrested"]=noArrest[i];
-    jsonData2.push(tempData2);
-
-  }
-
-
-  fs.writeFileSync("../outputdata/crimedata.json",JSON.stringify(jsonData1),encoding="utf8");
-  console.log("Writtten to file1");
-  fs.writeFileSync("../outputdata/assault.json",JSON.stringify(jsonData2),encoding="utf8");
-  console.log("Written to file 2");
-
-});
+}(2012));

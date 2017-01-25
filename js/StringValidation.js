@@ -4,4 +4,4 @@ module.exports = function(st) {
     } catch (e) {
         return null;
     }
-}
+};

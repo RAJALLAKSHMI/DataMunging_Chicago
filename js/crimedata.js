@@ -1,6 +1,6 @@
-module.exports = (function(age)
+module.exports = (function (age)
 {
-if(!age){
+if(!age) {
   throw Error('Not a number');
 }
 if(typeof age!=="number"){
@@ -74,13 +74,13 @@ rl.on('close', function() {
     for (i = 0; i <= 15; i = i + 1) {
         tempData1 = {};
         tempData1.Year = i + 2001;
-        tempData1['Over $500'] = over[i];
-        tempData1['Under $500'] = under[i];
+        tempData1.Over$500 = over[i];
+        tempData1.Under$500 = under[i];
         jsonData1.push(tempData1);
         tempData2 = {};
         tempData2.Year = i + 2001;
         tempData2.Arrested = arrested[i];
-        tempData2['Not Arrested'] = noArrest[i];
+        tempData2.NotArrested = noArrest[i];
         jsonData2.push(tempData2);
     }
     fs.writeFileSync('../outputdata/crimedata.json', JSON.stringify(jsonData1), 'utf8');
@@ -88,6 +88,6 @@ rl.on('close', function() {
     fs.writeFileSync('../outputdata/assault.json', JSON.stringify(jsonData2), 'utf8');
     logger.debug('Written to file 2');
   });
-  return "JSON written successfully";
+  return 'JSON written successfully';
 }
-}(2012));
+})(2001);
